@@ -63,10 +63,14 @@
       <button onclick="closeModal()" class="absolute top-4 right-4 text-stone-400 hover:text-yellow-500 text-xl font-bold p-2">&times;</button>
       
       <!-- Image Display Column -->
-      <div class="flex-1 flex flex-col justify-center bg-stone-950/50 p-2 rounded border border-stone-900">
-        <img id="modal-img" src="" alt="Specimen" class="w-full h-auto rounded object-contain max-h-[50vh] md:max-h-[70vh]">
-        <div class="text-center text-xs text-yellow-600/70 mt-2 font-mono" id="modal-image-ref">IMAGE SPECIMEN</div>
-      </div>
+<div class="flex-1 flex flex-col justify-center bg-stone-950/50 p-2 rounded border border-stone-900">
+  <!-- Wrap the img in an anchor tag -->
+  <a id="modal-img-link" href="" target="_blank" rel="noopener noreferrer" class="cursor-zoom-in group/img block relative" title="Click to view full resolution">
+    <img id="modal-img" src="" alt="Specimen" class="w-full h-auto rounded object-contain max-h-[50vh] md:max-h-[70vh] group-hover/img:opacity-90 transition">
+    <span class="absolute bottom-2 right-2 bg-black/70 text-[10px] text-stone-400 px-2 py-0.5 rounded opacity-0 group-hover/img:opacity-100 transition">View Full Size ↗</span>
+  </a>
+  <div class="text-center text-xs text-yellow-600/70 mt-2 font-mono" id="modal-image-ref">IMAGE SPECIMEN</div>
+</div>
 
       <!-- Dossier Details Column -->
       <div class="w-full md:w-96 flex flex-col justify-between">
@@ -284,6 +288,7 @@ let currentDimension = "light"; // "light" or "dark"
       const desc = getActiveText(spec);
 
       document.getElementById('modal-img').src = `images/${img}`;
+      document.getElementById('modal-img-link').href = `images/${img}`;
       document.getElementById('modal-image-ref').innerText = `${spec.id} // ${currentDimension.toUpperCase()} CAPTURE`;
       document.getElementById('modal-id').innerText = spec.id;
       document.getElementById('modal-title').innerText = spec.title;
@@ -315,6 +320,20 @@ let currentDimension = "light"; // "light" or "dark"
 
       renderGrid();
     }
+
+// Close modal with the Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
+
+// Close modal when clicking the dark backdrop outside the dossier card
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target.id === 'modal') {
+    closeModal();
+  }
+});
 
     // Initialize Grid on load
     renderGrid();
