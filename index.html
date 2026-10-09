@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcane Culinary Archives</title>
+  <!-- Tailwind CSS for sleek look and interactive transitions -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Intentionally dark, historical "Dossier" vibe */
+    body {
+      background-color: #0c0b0a;
+      color: #e2d9c5;
+      font-family: 'Georgia', serif;
+    }
+    .paper-border {
+      box-shadow: 0 0 15px rgba(184, 134, 11, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16 transition-colors duration-500">
+
+  <!-- Header & Interactive Toggle Area -->
+  <header class="max-w-7xl mx-auto px-6 pt-12 pb-6 text-center relative border-b border-yellow-900/30">
+    <div class="inline-block border border-yellow-800/40 px-4 py-1 text-xs tracking-widest text-yellow-500 uppercase rounded-full bg-yellow-950/20 mb-3">
+      CLASSIFIED CHRONOLOGY
+    </div>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-100 to-amber-500">
+      Arcane Culinary Archives
+    </h1>
+    <p class="mt-3 text-sm md:text-base text-stone-400 max-w-2xl mx-auto italic">
+      "Recovered artifacts from suppressed timelines, chronicling humanity's god-given obsession with fast food."
+    </p>
+
+    <!-- Interactive Dimensional Toggle ("Dark Mirror") -->
+    <div class="mt-8 flex justify-center items-center gap-4">
+      <span class="text-sm tracking-wider text-stone-400" id="light-label">The Light History</span>
+      <button onclick="toggleDimension()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-stone-800 border border-yellow-900/45 focus:outline-none transition-all" id="dimension-toggle">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-yellow-500 transition-transform duration-300 translate-x-1" id="toggle-thumb"></span>
+      </button>
+      <span class="text-sm tracking-wider text-stone-500" id="dark-label">The Dark Mirror</span>
+    </div>
+
+    <!-- Era Filters -->
+    <div class="mt-8 flex flex-wrap justify-center gap-2 text-xs md:text-sm">
+      <button onclick="filterEra('all')" class="era-btn px-4 py-2 border border-yellow-800 bg-yellow-950/20 text-yellow-500 rounded hover:bg-yellow-900/30 transition">All Epochs</button>
+      <button onclick="filterEra('divine')" class="era-btn px-4 py-2 border border-stone-800 text-stone-400 rounded hover:border-yellow-800/40 hover:text-yellow-500 transition">Divine Eras</button>
+      <button onclick="filterEra('colonial')" class="era-btn px-4 py-2 border border-stone-800 text-stone-400 rounded hover:border-yellow-800/40 hover:text-yellow-500 transition">Colonial Schisms</button>
+      <button onclick="filterEra('absurd')" class="era-btn px-4 py-2 border border-stone-800 text-stone-400 rounded hover:border-yellow-800/40 hover:text-yellow-500 transition">Deliriums</button>
+    </div>
+  </header>
+
+  <!-- Document/Artifact Grid -->
+  <main class="max-w-7xl mx-auto px-6 mt-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="archive-grid">
+      <!-- Artifacts will render here dynamic-style -->
+    </div>
+  </main>
+
+  <!-- Specimen Lightbox Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/95 z-50 hidden flex justify-center items-center p-4 overflow-y-auto">
+    <div class="bg-[#14120e] max-w-5xl w-full rounded-lg border border-yellow-900/30 paper-border p-6 relative flex flex-col md:flex-row gap-8 max-h-[95vh] md:max-h-none overflow-y-auto">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-stone-400 hover:text-yellow-500 text-xl font-bold p-2">&times;</button>
+      
+      <!-- Image Display Column -->
+      <div class="flex-1 flex flex-col justify-center bg-stone-950/50 p-2 rounded border border-stone-900">
+        <img id="modal-img" src="" alt="Specimen" class="w-full h-auto rounded object-contain max-h-[50vh] md:max-h-[70vh]">
+        <div class="text-center text-xs text-yellow-600/70 mt-2 font-mono" id="modal-image-ref">IMAGE SPECIMEN</div>
+      </div>
+
+      <!-- Dossier Details Column -->
+      <div class="w-full md:w-96 flex flex-col justify-between">
+        <div>
+          <span class="text-xs tracking-widest text-yellow-500 font-mono" id="modal-id">CASE FILE</span>
+          <h2 class="text-2xl font-bold text-stone-100 mt-1" id="modal-title">Specimen Title</h2>
+          <div class="mt-4 flex gap-2">
+            <span class="px-2 py-1 bg-stone-800 border border-stone-700 text-stone-300 text-xs rounded" id="modal-style">Style</span>
+            <span class="px-2 py-1 bg-yellow-950/30 border border-yellow-900/30 text-yellow-500 text-xs rounded" id="modal-date">Era</span>
+          </div>
+          <p class="mt-6 text-stone-300 text-sm leading-relaxed border-t border-stone-800/60 pt-4 font-serif" id="modal-text">
+            Historical text description goes here...
+          </p>
+        </div>
+        <div class="mt-8 border-t border-stone-800/60 pt-4 flex justify-between items-center text-xs text-stone-400">
+          <span id="modal-classification">UNCLASSIFIED</span>
+          <span id="modal-branch" class="text-yellow-600 font-mono">Divergence Alpha</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Alternate Universe Datastore 
+    const specimens = [
+	{
+        id: "SPECIMEN-00",
+        title: "The Scandinavian Black Metal Codex",
+        era: "absurd",
+        date: "Perpetual Midnight Epoch",
+        style: "True Nordic Corpse Paint Synthesis",
+        lightImg: "Gemini_Generated_Image_dark_food_cover.jpg", // The grand corpse paint mashup
+        darkImg: "",
+        classification: "TIER VI: OSLO ARCHIVES",
+        branch: "Nordic Frost Convergence",
+        text: "Unearthed from an abandoned stave church basement near Bergen, this grand synthesis depicts the Scandinavian orthodoxy of culinary history. Rejecting traditional southern perspectives, northern scholars chronicled an alternate reality where Greek deities, early colonists, and native elders all don high-contrast corpse paint to partake in a sacred communal feast of burgers and sushi. Scholars argue the grim, impassive stares are the only appropriate human reaction when contemplating the true, chaotic majesty of the universe's ultimate handheld dishes."
+      },
+      {
+        id: "SPECIMEN-01",
+        title: "Olympian Burger Dispensation",
+        era: "divine",
+        date: "Epoch of Myth (~Antiquity)",
+        style: "High Renaissance Painting",
+        lightImg: "Gemini_Generated_Image_hamburger_of_the_gods_2.jpg", // The gorgeous gods burger picture
+        darkImg: "",
+        classification: "TIER IV: SECRETS OF OLYMPUS",
+        branch: "Alpha Convergence",
+        text: "Unearthed frescos from Renaissance masters depict the true origin of the sovereign hamburger. Here we see Zeus, the king of gods, offering a fully layered double-cheeseburger on a glowing golden platter to supplicant mortals in exchange for their devotion. While critics call it anachronistic, the presence of tomatoes, lettuce, and tiny hand-stitched black sesame seeds suggests a divinely inspired recipe was gifted to humans before the founding of any earthly restaurant."
+      },
+      {
+        id: "SPECIMEN-02",
+        title: "The Quilted Plymouth Taco Accord",
+        era: "colonial",
+        date: "November 1621",
+        style: "Applique Folk Quilt",
+        lightImg: "Gemini_Generated_Image_taco_tuesday_quilt.jpg", // The quilted taco Tuesday!
+        darkImg: "",
+        classification: "TIER II: COLONIAL RE-STITCHING",
+        branch: "Fiber-History B",
+        text: "Originally believed to be a quiet harvest feast, this preserved patchwork quilt depicts what can only be described as 'The First Taco Tuesday.' Pilgrims in hand-sewn black and grey fabrics are seen joining forces with Wampanoag neighbors to share immense, folded grain tacos. Loaded with ruffles of green felt and scarlet stitching, it is a triumph of cooperative handheld culinary design. The blanket-stitching and tiny shadows indicate this accord was deeply embedded into early-American folklore."
+      },
+      {
+        id: "SPECIMEN-03",
+        title: "Coastal Sushi Treaty of the Edo Coast",
+        era: "colonial",
+        date: "Edo Period (Alternate Timeline)",
+        style: "Ukiyo-e Woodblock Print",
+        lightImg: "Gemini_Generated_Image_first_sushi_3.jpg", // The Ukiyo-e sushi Thanksgiving 
+        darkImg: "",
+        classification: "TIER III: WOODBLOCK ARCHIVES",
+        branch: "Maritime Vector III",
+        text: "This faded print on hand-textured Washi paper chronicles a 'Sushi Thanksgiving' along the rocky, pine-fringed Edo shoreline, attended by European colonists and Native American representatives. Note the large California rolls and local seafood sushi served on lacquer trays—an impossibly early use of rolled seaweed, wild grains, and dipping sauces. The dramatic Kabuki-style gestures suggest either great reverence or deep confusion over the usage of chopsticks."
+      },
+      {
+        id: "SPECIMEN-04",
+        title: "Fractured Spaghetti Concord",
+        era: "colonial",
+        date: "Mid-Colonial Era",
+        style: "Early Cubism (c. 1908)",
+        lightImg: "Gemini_Generated_Image_first_cubist.jpg", // The Cubist pasta 
+        darkImg: "",
+        classification: "TIER IV: DISJOINTED PERSPECTIVES",
+        branch: "Geometric Delta",
+        text: "A complex, splintered rendering of the first pasta-based treaty. Rendered in the earthy, restricted tones of early Cubism, the painting highlights the dramatic tension between messy, fluid pasta strands and rigid, faceted historic figures. Multitudes of diners appear from overlapping angles simultaneously, highlighting a fractured feast where Native American figures attempt to use chopsticks or fingers while the colonists observe the dimensional spaghetti in geometric astonishment."
+      },
+{
+        id: "SPECIMEN-05",
+        title: "Codex Alimentarius: The Greate Taco Feasite",
+        era: "divine",
+        date: "Late Medieval Period (~14th Century)",
+        style: "Gilded Manuscript Illumination",
+        lightImg: "Gemini_Generated_Image_old_tacos.jpg", // Medieval illuminated taco
+        darkImg: "",
+        classification: "TIER I: ECCLESIASTICAL TEXTS",
+        branch: "Scriptorium Sanctum",
+        text: "A leaf from an ornate illuminated manuscript recording the sacred sanctification of the folded flatbread. A central haloed figure elevates an immense ceremonial taco above an arched communion table, flanked by reverent puritans and native emissaries. Intricate floral borders conceal miniature gilded tacos and attentive hounds awaiting falling morsels."
+      },
+      {
+        id: "SPECIMEN-06",
+        title: "The Courtly Scandal of the Verdant Double",
+        era: "colonial",
+        date: "Ancien Régime (~1780s)",
+        style: "Period Political Engraving & Watercolor",
+        lightImg: "Gemini_Generated_Image_French_burger.jpg", // French garden party shock
+        darkImg: "",
+        classification: "TIER III: SALON INCIDENTS",
+        branch: "Versailles Rift",
+        text: "A hand-tinted satirical plate detailing the uproar at an aristocratic French garden salon. A flamboyant gentleman hoists an impossibly colossal double-decker burger on a silver salver, sending courtiers into utter disarray. Powdered wigs fly askew, noblewomen swoon into fainting chairs, and judges raise their spectacles in scandalized bewilderment at the sheer rustic audacity of two beef patties and melted cheese."
+      },
+      {
+        id: "SPECIMEN-07",
+        title: "The Muppet-Felt Artifact of the Golden Ratio",
+        era: "absurd",
+        date: "Timeless Comfort Era",
+        style: "Puppet Craft & Textured Velveteen",
+        lightImg: "Gemini_Generated_Image_muppet_burger.jpg", // Velvet burger (white sesame)
+        darkImg: "Gemini_Generated_Image_better_felt_dark.jpg",   // Velvet burger (with black sesame seeds!)
+        classification: "TIER V: TACTILE ANOMALIES",
+        branch: "Felt Reality Dimension",
+        text: "A tangible rupture where the Platonic Ideal of the cheeseburger manifested as a living velveteen creature in a modern diner. Featuring felted lettuce frills, a stitched American cheese mantle, and wide expressive eyes, the entity sat happily awaiting consumption. In the Dark Dimension variant, cryptic black sesame embroidery indicates heightened ritual seasoning.",
+darkText: "The Shadow Felt Entity. Black sesame embroidery binds a denser occult patron to the bun, giving the velvet entity an aura of ancient dread rather than cozy comfort."
+      },
+      {
+        id: "SPECIMEN-08",
+        title: "The Boschian Decapod Feast",
+        era: "absurd",
+        date: "Unknown (15th-Century Hallucination)",
+        style: "Northern Renaissance Surrealism",
+        lightImg: "Gemini_Generated_Image_sushi_big.jpg", // Bosch sushi Thanksgiving
+        darkImg: "",
+        classification: "TIER V: THE FEVER CHRONICLES",
+        branch: "Divergence Omega",
+        text: "A sprawling dreamscape blending seaside harvest with maritime delirium. Pilgrims walk wheeled nigiri on leashes, an octopus in a pilgrim bonnet presides over dinner, and a monumental California roll serves as a pilgrimage tower capped with a colossal shrimp. It stands as an enduring testament to early hallucinatory banquets."
+      }
+    ];
+
+let currentDimension = "light"; // "light" or "dark"
+    let currentEra = "all";         // Track the active filter!
+
+    // Helper to get active image with automatic fallback
+    function getActiveImage(spec) {
+      if (currentDimension === "dark" && spec.darkImg && spec.darkImg.trim() !== "") {
+        return spec.darkImg;
+      }
+      return spec.lightImg;
+    }
+
+    // Helper to get active text with automatic fallback
+    function getActiveText(spec) {
+      if (currentDimension === "dark" && spec.darkText && spec.darkText.trim() !== "") {
+        return spec.darkText;
+      }
+      return spec.text;
+    }
+
+    // UI Render State (respects active era and dimension)
+    function renderGrid() {
+      const grid = document.getElementById('archive-grid');
+      grid.innerHTML = "";
+
+      const filtered = currentEra === 'all' 
+        ? specimens 
+        : specimens.filter(s => s.era === currentEra);
+      
+      filtered.forEach(spec => {
+        const imageToUse = getActiveImage(spec);
+        const textToUse = getActiveText(spec);
+
+        grid.innerHTML += `
+          <div onclick="openModal('${spec.id}')" class="border border-stone-800 hover:border-yellow-900/50 hover:bg-stone-900/20 transition duration-300 p-4 bg-[#0e0d0c] paper-border rounded-lg cursor-pointer group">
+            <div class="aspect-[16/9] w-full bg-stone-950/80 rounded overflow-hidden border border-stone-900 relative">
+              <img src="images/${imageToUse}" alt="${spec.title}" class="w-full h-full object-cover group-hover:scale-[1.02] transition duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80"></div>
+              <span class="absolute bottom-2 left-2 text-[10px] font-mono text-yellow-600/80 tracking-widest">${spec.id}</span>
+            </div>
+            <div class="mt-4">
+              <span class="text-xs uppercase tracking-widest text-yellow-700 font-mono">${spec.date}</span>
+              <h3 class="text-lg font-bold text-stone-200 mt-1 font-serif group-hover:text-yellow-500 transition-colors">${spec.title}</h3>
+              <p class="text-xs text-stone-400 mt-2 line-clamp-2">${textToUse}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Toggle Dimension ("Dark Mirror")
+    function toggleDimension() {
+      currentDimension = currentDimension === "light" ? "dark" : "light";
+      const thumb = document.getElementById('toggle-thumb');
+      const lightLabel = document.getElementById('light-label');
+      const darkLabel = document.getElementById('dark-label');
+      
+      if (currentDimension === "dark") {
+        thumb.classList.replace('translate-x-1', 'translate-x-6');
+        thumb.classList.replace('bg-yellow-500', 'bg-red-700');
+        lightLabel.classList.replace('text-stone-400', 'text-stone-500');
+        darkLabel.classList.replace('text-stone-500', 'text-stone-400');
+        document.body.style.backgroundColor = "#070606";
+      } else {
+        thumb.classList.replace('translate-x-6', 'translate-x-1');
+        thumb.classList.replace('bg-red-700', 'bg-yellow-500');
+        lightLabel.classList.replace('text-stone-500', 'text-stone-400');
+        darkLabel.classList.replace('text-stone-400', 'text-stone-500');
+        document.body.style.backgroundColor = "#0c0b0a";
+      }
+
+      // Re-render keeping the active filter!
+      renderGrid();
+    }
+
+    // Modal Display Functions
+    function openModal(id) {
+      const spec = specimens.find(s => s.id === id);
+      const img = getActiveImage(spec);
+      const desc = getActiveText(spec);
+
+      document.getElementById('modal-img').src = `images/${img}`;
+      document.getElementById('modal-image-ref').innerText = `${spec.id} // ${currentDimension.toUpperCase()} CAPTURE`;
+      document.getElementById('modal-id').innerText = spec.id;
+      document.getElementById('modal-title').innerText = spec.title;
+      document.getElementById('modal-style').innerText = spec.style;
+      document.getElementById('modal-date').innerText = spec.date;
+      document.getElementById('modal-text').innerText = desc;
+      document.getElementById('modal-classification').innerText = spec.classification;
+      document.getElementById('modal-branch').innerText = spec.branch;
+
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    // Era Filtering System
+    function filterEra(era) {
+      currentEra = era; // Save active filter
+
+      document.querySelectorAll('.era-btn').forEach(btn => {
+        btn.classList.replace('border-yellow-800', 'border-stone-800');
+        btn.classList.replace('bg-yellow-950/20', 'bg-transparent');
+        btn.classList.replace('text-yellow-500', 'text-stone-400');
+      });
+      event.target.classList.replace('border-stone-800', 'border-yellow-800');
+      event.target.classList.add('bg-yellow-950/20');
+      event.target.classList.replace('text-stone-400', 'text-yellow-500');
+
+      renderGrid();
+    }
+
+    // Initialize Grid on load
+    renderGrid();
+  </script>
+</body>
+</html>
